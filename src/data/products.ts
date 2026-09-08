@@ -1,11 +1,13 @@
 import { ProductDefinition } from '../types';
 
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
 export const PRODUCTS: ProductDefinition[] = [
   {
     id: 'ceramic-mug',
     name: 'Ceramic Coffee Mug',
     category: 'drinkware',
-    modelPath: '/assets/products/mug/model.glb',
+    modelPath: `${base}/assets/products/mug/model.glb`,
     mappingStrategy: 'uv',
     printableMeshName: 'Coffee-Mug',
     printableMaterialName: 'Logo',
@@ -54,7 +56,7 @@ export const PRODUCTS: ProductDefinition[] = [
     id: 'tshirt-sporty',
     name: 'Classic Regular T-Shirt',
     category: 'apparel',
-    modelPath: '/assets/products/tshirt/model.glb',
+    modelPath: `${base}/assets/products/tshirt/model.glb`,
     mappingStrategy: 'hybrid',
     printableMeshName: 'T_Shirt_male',
     printableMaterialName: 'lambert1',
