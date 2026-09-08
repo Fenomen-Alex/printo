@@ -1,0 +1,110 @@
+{
+  "products": [
+    {
+      "id": "ceramic-mug",
+      "name": "Classic Ceramic Mug (11 oz)",
+      "category": "drinkware",
+      "model": "/assets/products/mug/model.glb",
+      "source": "Three.js / Blender Mug Configurator Asset (Adapted from Carlo Gattuso Mug Maker)",
+      "license": "MIT / CC-BY 4.0",
+      "attribution": "Model based on Blender Mug topology with separated printable outer jacket and ceramic components",
+      "mappingStrategy": "uv",
+      "complexity": {
+        "vertices": 32684,
+        "triangles": 16298,
+        "primitives": 6,
+        "fileSizeBytes": 1427280
+      },
+      "materials": {
+        "printableMesh": "Coffee-Mug",
+        "printableMaterialName": "Logo",
+        "ceramicMaterials": ["Base", "Bevel", "Inner", "Handle"],
+        "liquidMaterial": "Coffee",
+        "defaultColor": "#FFFFFF",
+        "materialType": "MeshPhysicalMaterial",
+        "roughness": 0.18,
+        "metalness": 0.02,
+        "clearcoat": 0.35
+      },
+      "printableRegion": {
+        "id": "mug-outer-wrap",
+        "name": "Full Wrap Area",
+        "widthMm": 198,
+        "heightMm": 80,
+        "aspectRatio": 2.475,
+        "uvBounds": {
+          "uMin": 0.0911,
+          "uMax": 0.9147,
+          "vMin": 0.1390,
+          "vMax": 0.7715
+        },
+        "textureResolution": {
+          "width": 2048,
+          "height": 1024
+        }
+      },
+      "camera": {
+        "initialPosition": [0, 2.5, 18],
+        "target": [0, 0, 0],
+        "minDistance": 8,
+        "maxDistance": 30,
+        "fov": 45
+      }
+    },
+    {
+      "id": "tshirt-sporty",
+      "name": "Classic Regular Fit T-Shirt",
+      "category": "apparel",
+      "model": "/assets/products/tshirt/model.glb",
+      "source": "JavaScript Mastery / 3D Swag Apparel Model",
+      "license": "MIT / CC-BY 4.0",
+      "attribution": "Optimized PBR garment model with realistic fabric folds, normal map and AO",
+      "mappingStrategy": "hybrid",
+      "complexity": {
+        "vertices": 10513,
+        "triangles": 19517,
+        "primitives": 1,
+        "fileSizeBytes": 1048108
+      },
+      "materials": {
+        "printableMesh": "T_Shirt_male",
+        "materialName": "lambert1",
+        "defaultColor": "#E8E6E3",
+        "materialType": "MeshStandardMaterial",
+        "roughness": 0.85,
+        "metalness": 0.05,
+        "hasNormalMap": true,
+        "hasOcclusionMap": true
+      },
+      "printableRegion": {
+        "id": "tshirt-front-chest",
+        "name": "Front Chest & Torso",
+        "widthMm": 300,
+        "heightMm": 380,
+        "aspectRatio": 0.789,
+        "projection": {
+          "defaultPosition": [0, 0.04, 0.15],
+          "defaultRotation": [0, 0, 0],
+          "defaultScale": [0.18, 0.18, 0.18]
+        },
+        "uvBounds": {
+          "uMin": 0.05,
+          "uMax": 0.95,
+          "vMin": 0.05,
+          "vMax": 0.95
+        },
+        "textureResolution": {
+          "width": 1024,
+          "height": 1024
+        }
+      },
+      "camera": {
+        "initialPosition": [0, 0, 1.3],
+        "target": [0, -0.05, 0],
+        "minDistance": 0.6,
+        "maxDistance": 2.5,
+        "fov": 42
+      }
+    }
+  ]
+}

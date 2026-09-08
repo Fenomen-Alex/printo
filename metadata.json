@@ -1,0 +1,6 @@
+{
+  "name": "Printo - 3D Print Configurator",
+  "description": "Lightweight web-based 3D print configurator with realistic surface mapping for mugs and apparel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,6 +1,12 @@
+node_modules/
+build/
+dist/
+coverage/
+*.log
 .idea/
 .DS_Store
-.env
+.env*
+!.env.example
 .opencode/
 /.agents/
 /.claude/
