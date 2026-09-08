@@ -1,6 +1,6 @@
 import './index.css';
 import { PRODUCTS } from './data/products';
-import { STARTER_GRAPHICS, TEMPLATES } from './data/templates';
+import { TEMPLATES } from './data/templates';
 import { ProductDefinition, DesignDocument, DesignElement, TextElement, ImageElement } from './types';
 import { PrintCompositor } from './core/compositor';
 import { ProductViewer } from './core/viewer';
