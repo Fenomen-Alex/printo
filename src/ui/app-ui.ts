@@ -1,4 +1,4 @@
-import { ProductDefinition, DesignDocument, TextElement, ImageElement } from '../types';
+import { ProductConfig, DesignDocument, TextElement, ImageElement } from '../types';
 import { STARTER_GRAPHICS, TEMPLATES } from '../data/templates';
 import { ICONS } from './icons';
 
@@ -12,6 +12,7 @@ export interface AppUIHandlers {
   onUpdateText: (id: string, updates: Partial<TextElement>) => void;
   onRemoveText: (id: string) => void;
   onApplyTemplate: (templateId: string) => void;
+  onResetDesign: () => void;
   onResetCamera: () => void;
   onToggleAutoRotate: (enabled: boolean) => void;
   onSnapshot: () => void;
@@ -20,7 +21,8 @@ export interface AppUIHandlers {
 export class AppUI {
   private container: HTMLElement;
   private handlers: AppUIHandlers;
-  private currentProduct: ProductDefinition;
+  private products: ProductConfig[];
+  private currentProduct: ProductConfig;
   private designDoc: DesignDocument;
   private activeTab: 'product' | 'artwork' | 'text' | 'templates' = 'product';
   private isAutoRotating = false;
@@ -29,11 +31,13 @@ export class AppUI {
 
   constructor(
     container: HTMLElement,
-    initialProduct: ProductDefinition,
+    products: ProductConfig[],
+    initialProduct: ProductConfig,
     initialDoc: DesignDocument,
     handlers: AppUIHandlers
   ) {
     this.container = container;
+    this.products = products;
     this.currentProduct = initialProduct;
     this.designDoc = initialDoc;
     this.handlers = handlers;
@@ -41,7 +45,7 @@ export class AppUI {
     this.render();
   }
 
-  public updateState(product: ProductDefinition, doc: DesignDocument) {
+  public updateState(product: ProductConfig, doc: DesignDocument) {
     this.currentProduct = product;
     this.designDoc = doc;
     this.render();
@@ -160,9 +164,9 @@ export class AppUI {
         <footer class="px-4 py-3 bg-stone-50/80 border-t border-stone-200/70 lg:rounded-b-3xl flex items-center justify-between text-[11px] text-stone-500">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>${this.currentProduct.printableRegion.name}</span>
+            <span>${this.currentProduct.printableSurfaces[0].name}</span>
           </div>
-          <span class="font-mono">${this.currentProduct.printableRegion.widthMm} × ${this.currentProduct.printableRegion.heightMm} mm</span>
+          <span class="font-mono">${this.currentProduct.printableSurfaces[0].printableWidthMm} × ${this.currentProduct.printableSurfaces[0].printableHeightMm} mm</span>
         </footer>
       </aside>
 
@@ -182,7 +186,7 @@ export class AppUI {
       <div class="hidden md:flex absolute bottom-5 right-6 z-20 flex-col items-end gap-1 pointer-events-none select-none">
         <div class="bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-stone-200 text-[11px] text-stone-500 flex items-center gap-2">
           <span>Surface Mapping:</span>
-          <span class="font-semibold text-stone-800 uppercase">${this.currentProduct.mappingStrategy}</span>
+          <span class="font-semibold text-stone-800 uppercase">${this.currentProduct.printableSurfaces[0].strategy}</span>
         </div>
       </div>
     `;
@@ -206,31 +210,38 @@ export class AppUI {
   }
 
   private renderProductTab(): string {
-    const isMug = this.currentProduct.id === 'ceramic-mug';
+    const surface = this.currentProduct.printableSurfaces[0];
+    const material = this.currentProduct.material;
+
+    const switchButtonId = (productId: string): string => {
+      const short: Record<string, string> = { 'ceramic-mug': 'mug', 'tshirt-sporty': 'shirt' };
+      return short[productId] ?? productId;
+    };
+
     return `
       <!-- Product Switcher Buttons -->
       <div class="space-y-2">
-        <label class="text-xs font-bold uppercase tracking-wider text-stone-500">Select Blank Product</label>
+        <label class="text-xs font-bold uppercase tracking-wider text-stone-500">Blank Product</label>
         <div class="grid grid-cols-2 gap-2.5">
-          <button id="btn-select-mug" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all text-center ${
-            isMug
-              ? 'border-stone-900 bg-stone-900 text-white shadow-md'
-              : 'border-stone-200 hover:border-stone-300 bg-white text-stone-700'
-          }">
-            <div class="p-2 rounded-xl ${isMug ? 'bg-white/10' : 'bg-stone-100'}">${ICONS.mug}</div>
-            <span class="font-semibold text-xs">Ceramic Mug</span>
-            <span class="text-[10px] ${isMug ? 'text-stone-300' : 'text-stone-500'}">11 oz Full Wrap</span>
-          </button>
-
-          <button id="btn-select-shirt" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all text-center ${
-            !isMug
-              ? 'border-stone-900 bg-stone-900 text-white shadow-md'
-              : 'border-stone-200 hover:border-stone-300 bg-white text-stone-700'
-          }">
-            <div class="p-2 rounded-xl ${!isMug ? 'bg-white/10' : 'bg-stone-100'}">${ICONS.shirt}</div>
-            <span class="font-semibold text-xs">Regular T-Shirt</span>
-            <span class="text-[10px] ${!isMug ? 'text-stone-300' : 'text-stone-500'}">Sport Cotton Fabric</span>
-          </button>
+          ${this.products
+            .map((p) => {
+              const active = this.currentProduct.id === p.id;
+              const btnId = `btn-select-${switchButtonId(p.id)}`;
+              return `
+            <button id="${btnId}" data-select-product="${p.id}" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all text-center ${
+                active
+                  ? 'border-stone-900 bg-stone-900 text-white shadow-md'
+                  : 'border-stone-200 hover:border-stone-300 bg-white text-stone-700'
+              }">
+              <div class="p-2 rounded-xl ${active ? 'bg-white/10' : 'bg-stone-100'}">${
+                switchButtonId(p.id) === 'mug' ? ICONS.mug : ICONS.shirt
+              }</div>
+              <span class="font-semibold text-xs">${p.name}</span>
+              <span class="text-[10px] ${active ? 'text-stone-300' : 'text-stone-500'}">${p.printableSurfaces[0]?.name || ''}</span>
+            </button>
+          `;
+            })
+            .join('')}
         </div>
       </div>
 
@@ -257,15 +268,32 @@ export class AppUI {
         </div>
       </div>
 
-      <!-- Physical Material Details -->
+      <!-- Surface & Material Specification -->
       <div class="p-3.5 bg-stone-100/70 rounded-2xl border border-stone-200/80 space-y-2 text-xs">
-        <div class="font-semibold text-stone-800">Surface Specifications</div>
-        <div class="grid grid-cols-2 gap-2 text-stone-600 text-[11px]">
-          <div>Material: <span class="font-medium text-stone-900">${isMug ? 'Glazed Ceramic' : 'Cotton Knit'}</span></div>
-          <div>Mapping: <span class="font-medium text-stone-900">${this.currentProduct.mappingStrategy.toUpperCase()}</span></div>
-          <div>Print Width: <span class="font-medium text-stone-900">${this.currentProduct.printableRegion.widthMm} mm</span></div>
-          <div>Print Height: <span class="font-medium text-stone-900">${this.currentProduct.printableRegion.heightMm} mm</span></div>
+        <div class="font-semibold text-stone-800">Surface &amp; Material Specification</div>
+        <div class="grid grid-cols-2 gap-x-2 gap-y-1.5 text-stone-600 text-[11px]">
+          <div>Surface: <span class="font-medium text-stone-900">${surface?.name || '—'}</span></div>
+          <div>Mapping: <span class="font-medium text-stone-900">${(surface?.strategy || 'uv').toUpperCase()}</span></div>
+          <div>Print Width: <span class="font-medium text-stone-900">${surface?.printableWidthMm ?? '—'} mm</span></div>
+          <div>Print Height: <span class="font-medium text-stone-900">${surface?.printableHeightMm ?? '—'} mm</span></div>
+          <div>Roughness: <span class="font-medium text-stone-900">${material.roughness}</span></div>
+          <div>Metalness: <span class="font-medium text-stone-900">${material.metalness}</span></div>
+          ${
+            material.clearcoat !== undefined
+              ? `<div>Clearcoat: <span class="font-medium text-stone-900">${material.clearcoat}</span></div>`
+              : ''
+          }
         </div>
+      </div>
+
+      <!-- Design Reset -->
+      <div class="space-y-2 pt-1 border-t border-stone-200/70">
+        <label class="text-xs font-bold uppercase tracking-wider text-stone-500">Design Reset</label>
+        <button id="btn-reset-design" class="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-stone-700 bg-white border border-stone-300 hover:bg-stone-100 rounded-xl transition-all active:scale-95">
+          <span class="text-stone-500">${ICONS.refresh}</span>
+          Reset Design &amp; Color
+        </button>
+        <p class="text-[10px] text-stone-400">Clears artwork and text and returns the product to its default base color.</p>
       </div>
     `;
   }
@@ -580,15 +608,18 @@ export class AppUI {
       btnSnapshot.addEventListener('click', () => this.handlers.onSnapshot());
     }
 
-    // Product selections
-    const btnSelectMug = this.container.querySelector<HTMLButtonElement>('#btn-select-mug');
-    if (btnSelectMug) {
-      btnSelectMug.addEventListener('click', () => this.handlers.onSelectProduct('ceramic-mug'));
-    }
+    // Product selections (data-driven from the products list)
+    this.container.querySelectorAll<HTMLButtonElement>('[data-select-product]').forEach((btn) => {
+      const productId = btn.dataset.selectProduct;
+      if (productId) {
+        btn.addEventListener('click', () => this.handlers.onSelectProduct(productId));
+      }
+    });
 
-    const btnSelectShirt = this.container.querySelector<HTMLButtonElement>('#btn-select-shirt');
-    if (btnSelectShirt) {
-      btnSelectShirt.addEventListener('click', () => this.handlers.onSelectProduct('tshirt-sporty'));
+    // Reset design (clears artwork/text and restores the default base color)
+    const btnResetDesign = this.container.querySelector<HTMLButtonElement>('#btn-reset-design');
+    if (btnResetDesign) {
+      btnResetDesign.addEventListener('click', () => this.handlers.onResetDesign());
     }
 
     // Base color swatches

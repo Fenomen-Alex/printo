@@ -59,7 +59,7 @@
       "source": "JavaScript Mastery / 3D Swag Apparel Model",
       "license": "MIT / CC-BY 4.0",
       "attribution": "Optimized PBR garment model with realistic fabric folds, normal map and AO",
-      "mappingStrategy": "hybrid",
+      "mappingStrategy": "uv",
       "complexity": {
         "vertices": 10513,
         "triangles": 19517,
@@ -82,11 +82,6 @@
         "widthMm": 300,
         "heightMm": 380,
         "aspectRatio": 0.789,
-        "projection": {
-          "defaultPosition": [0, 0.04, 0.15],
-          "defaultRotation": [0, 0, 0],
-          "defaultScale": [0.18, 0.18, 0.18]
-        },
         "uvBounds": {
           "uMin": 0.05,
           "uMax": 0.95,

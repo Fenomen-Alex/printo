@@ -1,18 +1,23 @@
 import './index.css';
-import { PRODUCTS } from './data/products';
+import { createPrinto, PrintoConfigurator } from 'printo-engine';
+import { PRODUCTS, getMugCamera, MUG_NARROW_PORTRAIT_ASPECT } from './data/products';
 import { TEMPLATES } from './data/templates';
-import { ProductDefinition, DesignDocument, DesignElement, TextElement, ImageElement } from './types';
-import { PrintCompositor } from './core/compositor';
-import { ProductViewer } from './core/viewer';
+import { ProductConfig, DesignDocument, TextElement, ImageElement } from './types';
 import { AppUI } from './ui/app-ui';
 
 class PrintoApp {
-  private currentProduct: ProductDefinition;
+  private currentProduct: ProductConfig;
   private designDoc: DesignDocument;
-  private compositor: PrintCompositor;
-  private viewer: ProductViewer;
+  private configurator: PrintoConfigurator;
   private ui: AppUI;
   private loadingOverlay: HTMLElement;
+  private narrowPortrait: boolean;
+
+  private applyResponsiveMugCamera() {
+    const mug = PRODUCTS.find((p) => p.id === 'ceramic-mug');
+    if (!mug) return;
+    Object.assign(mug.camera, getMugCamera(window.innerWidth / window.innerHeight));
+  }
 
   constructor() {
     const root = document.getElementById('root');
@@ -21,7 +26,7 @@ class PrintoApp {
     root.innerHTML = `
       <div id="canvas-container" class="absolute inset-0 w-full h-full"></div>
       <div id="ui-container" class="absolute inset-0 w-full h-full pointer-events-none"></div>
-      
+
       <!-- Initial Loading Screen -->
       <div id="loading-overlay" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#F5F6F8] transition-opacity duration-500 ease-out">
         <div class="flex flex-col items-center gap-4">
@@ -40,6 +45,8 @@ class PrintoApp {
 
     // Initial product
     this.currentProduct = PRODUCTS[0]; // Ceramic Mug
+    this.narrowPortrait = window.innerWidth / window.innerHeight <= MUG_NARROW_PORTRAIT_ASPECT;
+    this.applyResponsiveMugCamera();
 
     // Initial default design document with starter artwork & typography
     this.designDoc = {
@@ -47,17 +54,18 @@ class PrintoApp {
       elements: []
     };
 
-    // Instantiate core systems
-    this.compositor = new PrintCompositor();
-    this.viewer = new ProductViewer(canvasContainer);
-
-    // Link compositor updates to viewer texture
-    this.compositor.setOnUpdate(() => {
-      this.viewer.updateTexture();
+    // Instantiate the reusable engine
+    this.configurator = createPrinto({
+      container: canvasContainer,
+      products: PRODUCTS,
+      initialProductId: this.currentProduct.id,
+      onLoadingStarted: () => this.showLoading('Loading product...'),
+      onLoadingCompleted: () => this.hideLoading(),
+      onError: (e) => console.error('Printo error:', e.message, e.originalError)
     });
 
     // Instantiate UI
-    this.ui = new AppUI(uiContainer, this.currentProduct, this.designDoc, {
+    this.ui = new AppUI(uiContainer, PRODUCTS, this.currentProduct, this.designDoc, {
       onSelectProduct: (id) => this.selectProduct(id),
       onUpdateProductColor: (hex) => this.updateProductColor(hex),
       onAddImage: (dataUrl) => this.addImage(dataUrl),
@@ -67,22 +75,32 @@ class PrintoApp {
       onUpdateText: (id, updates) => this.updateText(id, updates),
       onRemoveText: (id) => this.removeText(id),
       onApplyTemplate: (tid) => this.applyTemplate(tid),
-      onResetCamera: () => this.viewer.resetCamera(),
-      onToggleAutoRotate: (enabled) => this.viewer.setAutoRotate(enabled),
-      onSnapshot: () => this.viewer.downloadSnapshot(`printo-${this.currentProduct.id}-${Date.now()}.png`)
+      onResetDesign: () => this.resetDesign(),
+      onResetCamera: () => this.configurator.resetCamera(),
+      onToggleAutoRotate: (enabled) => this.configurator.setAutoRotate(enabled),
+      onSnapshot: () => this.configurator.downloadSnapshot(`printo-${this.currentProduct.id}-${Date.now()}.png`)
     });
 
     // Initialize initial starter template and load product
     this.init();
+
+    // Re-target the mug camera when crossing into/out of extreme portrait
+    window.addEventListener('resize', () => {
+      const narrow = window.innerWidth / window.innerHeight <= MUG_NARROW_PORTRAIT_ASPECT;
+      if (narrow !== this.narrowPortrait) {
+        this.narrowPortrait = narrow;
+        this.applyResponsiveMugCamera();
+        if (this.currentProduct.id === 'ceramic-mug') {
+          this.configurator.resetCamera();
+        }
+      }
+    });
   }
 
   private async init() {
-    // Apply first template by default
-    await this.applyTemplate(TEMPLATES[0].id);
-
     try {
-      await this.viewer.loadProduct(this.currentProduct, this.compositor.getCanvas());
-      this.compositor.render(this.currentProduct, this.designDoc, true);
+      await this.configurator.init();
+      await this.applyTemplate(TEMPLATES[0].id);
     } catch (err) {
       console.error('Failed to initialize 3D model:', err);
     } finally {
@@ -126,11 +144,8 @@ class PrintoApp {
     }
 
     try {
-      // Re-composite 2D texture for new product dimensions & UV unwrap
-      this.compositor.render(this.currentProduct, this.designDoc, true);
-      // Load 3D model
-      await this.viewer.loadProduct(this.currentProduct, this.compositor.getCanvas());
-      this.viewer.updateProductColor(this.designDoc.productColor);
+      await this.configurator.setProduct(productId);
+      this.designDoc = this.configurator.getCurrentDesign();
       this.ui.updateState(this.currentProduct, this.designDoc);
     } catch (err) {
       console.error('Error switching product:', err);
@@ -141,40 +156,21 @@ class PrintoApp {
 
   private updateProductColor(hex: string) {
     this.designDoc.productColor = hex;
-    this.viewer.updateProductColor(hex);
-    this.compositor.render(this.currentProduct, this.designDoc);
+    this.configurator.setProductColor(hex);
+    this.designDoc = this.configurator.getCurrentDesign();
+    this.ui.updateState(this.currentProduct, this.designDoc);
+  }
+
+  private resetDesign() {
+    this.configurator.resetDesign();
+    this.designDoc = this.configurator.getCurrentDesign();
     this.ui.updateState(this.currentProduct, this.designDoc);
   }
 
   private async addImage(dataUrl: string) {
     try {
-      const img = await this.compositor.preloadImage(dataUrl);
-      const aspect = img.naturalWidth / (img.naturalHeight || 1);
-
-      // Replace existing image or add new
-      const existingImgIndex = this.designDoc.elements.findIndex((e) => e.type === 'image');
-      const newElem: ImageElement = {
-        id: `img-${Date.now()}`,
-        type: 'image',
-        src: dataUrl,
-        imageElement: img,
-        aspectRatio: aspect,
-        x: 0.5,
-        y: 0.44,
-        scale: 0.5,
-        rotation: 0,
-        opacity: 1,
-        visible: true
-      };
-
-      if (existingImgIndex >= 0) {
-        this.designDoc.elements[existingImgIndex] = newElem;
-      } else {
-        // Place image behind text
-        this.designDoc.elements.unshift(newElem);
-      }
-
-      this.compositor.render(this.currentProduct, this.designDoc);
+      await this.configurator.addImage(dataUrl);
+      this.designDoc = this.configurator.getCurrentDesign();
       this.ui.updateState(this.currentProduct, this.designDoc);
     } catch (err) {
       console.error('Failed to load image:', err);
@@ -182,54 +178,28 @@ class PrintoApp {
   }
 
   private updateImage(updates: Partial<ImageElement>) {
-    const img = this.designDoc.elements.find((e) => e.type === 'image') as ImageElement | undefined;
-    if (!img) return;
-
-    Object.assign(img, updates);
-    this.compositor.render(this.currentProduct, this.designDoc);
+    this.configurator.updateImage(updates);
   }
 
   private removeImage() {
-    this.designDoc.elements = this.designDoc.elements.filter((e) => e.type !== 'image');
-    this.compositor.render(this.currentProduct, this.designDoc);
+    this.configurator.removeImage();
+    this.designDoc = this.configurator.getCurrentDesign();
     this.ui.updateState(this.currentProduct, this.designDoc);
   }
 
   private addText(text: string, options?: Partial<TextElement>) {
-    const newText: TextElement = {
-      id: `txt-${Date.now()}`,
-      type: 'text',
-      text,
-      fontFamily: options?.fontFamily || 'Plus Jakarta Sans',
-      fontSize: options?.fontSize || 32,
-      fontWeight: options?.fontWeight || '700',
-      fontStyle: options?.fontStyle || 'normal',
-      color: options?.color || '#111827',
-      textAlign: options?.textAlign || 'center',
-      x: options?.x ?? 0.5,
-      y: options?.y ?? 0.75,
-      scale: options?.scale ?? 1,
-      rotation: options?.rotation ?? 0,
-      opacity: 1,
-      visible: true
-    };
-
-    this.designDoc.elements.push(newText);
-    this.compositor.render(this.currentProduct, this.designDoc);
+    this.configurator.addText(text, options);
+    this.designDoc = this.configurator.getCurrentDesign();
     this.ui.updateState(this.currentProduct, this.designDoc);
   }
 
   private updateText(id: string, updates: Partial<TextElement>) {
-    const item = this.designDoc.elements.find((e) => e.id === id);
-    if (!item || item.type !== 'text') return;
-
-    Object.assign(item, updates);
-    this.compositor.render(this.currentProduct, this.designDoc);
+    this.configurator.updateText(id, updates);
   }
 
   private removeText(id: string) {
-    this.designDoc.elements = this.designDoc.elements.filter((e) => e.id !== id);
-    this.compositor.render(this.currentProduct, this.designDoc);
+    this.configurator.removeText(id);
+    this.designDoc = this.configurator.getCurrentDesign();
     this.ui.updateState(this.currentProduct, this.designDoc);
   }
 
@@ -237,30 +207,24 @@ class PrintoApp {
     const tmpl = TEMPLATES.find((t) => t.id === templateId);
     if (!tmpl) return;
 
-    const newElements: DesignElement[] = [];
+    // Preserve the current product color across the reset
+    const color = this.configurator.getCurrentDesign().productColor;
+    this.configurator.resetDesign();
+    this.configurator.setProductColor(color);
 
+    // Apply template elements through the public API, in order.
+    // Images are added first (they render behind text), then text overlays.
     for (const el of tmpl.elements) {
       if (el.type === 'image' && el.svgMarkup) {
         const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(el.svgMarkup)}`;
-        const img = await this.compositor.preloadImage(svgDataUrl);
-        newElements.push({
-          id: `img-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-          type: 'image',
-          src: svgDataUrl,
-          imageElement: img,
-          aspectRatio: 1,
+        await this.configurator.addImage(svgDataUrl, {
           x: el.x,
           y: el.y,
           scale: el.scale,
-          rotation: el.rotation,
-          opacity: 1,
-          visible: true
+          rotation: el.rotation
         });
       } else if (el.type === 'text' && el.text) {
-        newElements.push({
-          id: `txt-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-          type: 'text',
-          text: el.text,
+        this.configurator.addText(el.text, {
           fontFamily: el.fontFamily || 'Plus Jakarta Sans',
           fontSize: el.fontSize || 28,
           fontWeight: el.fontWeight || '700',
@@ -270,15 +234,12 @@ class PrintoApp {
           x: el.x,
           y: el.y,
           scale: el.scale,
-          rotation: el.rotation,
-          opacity: 1,
-          visible: true
+          rotation: el.rotation
         });
       }
     }
 
-    this.designDoc.elements = newElements;
-    this.compositor.render(this.currentProduct, this.designDoc, true);
+    this.designDoc = this.configurator.getCurrentDesign();
     this.ui.updateState(this.currentProduct, this.designDoc);
   }
 }
