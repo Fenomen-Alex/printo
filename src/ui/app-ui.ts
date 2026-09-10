@@ -92,12 +92,8 @@ export class AppUI {
       <!-- Main Controls Panel (Floating Desktop Card / Slide-over Mobile Drawer) -->
       <aside id="printo-panel" class="pointer-events-auto absolute lg:top-20 lg:bottom-6 lg:left-6 z-30 w-full lg:w-96 max-w-full lg:max-h-[calc(100vh-6.5rem)] flex flex-col bg-white/95 backdrop-blur-xl border-t lg:border border-stone-200/90 lg:rounded-3xl shadow-2xl transition-all duration-300 ease-out ${
         this.isPanelHidden
-          ? 'lg:-translate-x-[120%] lg:opacity-0 lg:pointer-events-none max-lg:translate-y-full max-lg:pointer-events-none'
-          : `lg:translate-x-0 lg:opacity-100 ${
-              this.isMobileDrawerOpen
-                ? 'bottom-0 max-h-[82vh] rounded-t-3xl'
-                : 'max-lg:translate-y-full max-lg:pointer-events-none'
-            }`
+          ? 'hidden lg:-translate-x-[120%] lg:opacity-0 lg:pointer-events-none max-lg:translate-y-full max-lg:pointer-events-none'
+          : `lg:translate-x-0 lg:opacity-100`
       }">
         <!-- Panel Header with Title and Collapse Button -->
         <div class="flex items-center justify-between px-4 pt-3 pb-1 border-b border-stone-100">
