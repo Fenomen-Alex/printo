@@ -26,7 +26,6 @@ export class AppUI {
   private designDoc: DesignDocument;
   private activeTab: 'product' | 'artwork' | 'text' | 'templates' = 'product';
   private isAutoRotating = false;
-  private isMobileDrawerOpen = false;
   private isPanelHidden = false;
 
   constructor(
@@ -81,11 +80,6 @@ export class AppUI {
             <span class="text-amber-400">${ICONS.camera}</span>
             <span>Snapshot PNG</span>
           </button>
-
-          <!-- Mobile Drawer Toggle -->
-          <button id="btn-mobile-toggle" class="lg:hidden p-2 text-stone-800 bg-white/90 backdrop-blur-md rounded-xl shadow-sm border border-stone-200/80 active:scale-95" title="Toggle Mobile Menu">
-            ${this.isMobileDrawerOpen ? ICONS.x : ICONS.menu}
-          </button>
         </div>
       </header>
 
@@ -105,11 +99,6 @@ export class AppUI {
             <span>Hide</span>
             <span>${ICONS.chevronLeft}</span>
           </button>
-        </div>
-
-        <!-- Mobile Drawer Drag Handle -->
-        <div class="lg:hidden flex justify-center pt-2 pb-0.5">
-          <div class="w-10 h-1 rounded-full bg-stone-300"></div>
         </div>
 
         <!-- Navigation Tabs -->
@@ -533,7 +522,6 @@ export class AppUI {
       floatingOpenBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         this.isPanelHidden = false;
-        this.isMobileDrawerOpen = true;
         this.render();
       });
     }
@@ -544,9 +532,6 @@ export class AppUI {
       btnTogglePanel.addEventListener('click', (e) => {
         e.stopPropagation();
         this.isPanelHidden = !this.isPanelHidden;
-        if (!this.isPanelHidden) {
-          this.isMobileDrawerOpen = true;
-        }
         this.render();
       });
     }
@@ -557,7 +542,6 @@ export class AppUI {
       btnCollapsePanel.addEventListener('click', (e) => {
         e.stopPropagation();
         this.isPanelHidden = true;
-        this.isMobileDrawerOpen = false;
         this.render();
       });
     }
@@ -573,14 +557,6 @@ export class AppUI {
       });
     });
 
-    // Mobile drawer toggle
-    const btnMobileToggle = this.container.querySelector<HTMLButtonElement>('#btn-mobile-toggle');
-    if (btnMobileToggle) {
-      btnMobileToggle.addEventListener('click', () => {
-        this.isMobileDrawerOpen = !this.isMobileDrawerOpen;
-        this.render();
-      });
-    }
 
     // Auto rotate toggle
     const btnAutoRotate = this.container.querySelector<HTMLButtonElement>('#btn-auto-rotate');
