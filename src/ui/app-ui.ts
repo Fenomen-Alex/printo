@@ -198,11 +198,6 @@ export class AppUI {
     const surface = this.currentProduct.printableSurfaces[0];
     const material = this.currentProduct.material;
 
-    const switchButtonId = (productId: string): string => {
-      const short: Record<string, string> = { 'ceramic-mug': 'mug', 'tshirt-sporty': 'shirt' };
-      return short[productId] ?? productId;
-    };
-
     return `
       <!-- Product Switcher Buttons -->
       <div class="space-y-2">
@@ -211,16 +206,14 @@ export class AppUI {
           ${this.products
             .map((p) => {
               const active = this.currentProduct.id === p.id;
-              const btnId = `btn-select-${switchButtonId(p.id)}`;
+              const btnId = `btn-select-${p.id}`;
               return `
             <button id="${btnId}" data-select-product="${p.id}" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all text-center ${
                 active
                   ? 'border-stone-900 bg-stone-900 text-white shadow-md'
                   : 'border-stone-200 hover:border-stone-300 bg-white text-stone-700'
               }">
-              <div class="p-2 rounded-xl ${active ? 'bg-white/10' : 'bg-stone-100'}">${
-                switchButtonId(p.id) === 'mug' ? ICONS.mug : ICONS.shirt
-              }</div>
+              <div class="p-2 rounded-xl ${active ? 'bg-white/10' : 'bg-stone-100'}">${this.productIcon(p.id)}</div>
               <span class="font-semibold text-xs">${p.name}</span>
               <span class="text-[10px] ${active ? 'text-stone-300' : 'text-stone-500'}">${p.printableSurfaces[0]?.name || ''}</span>
             </button>
@@ -495,6 +488,26 @@ export class AppUI {
         </div>
       </div>
     `;
+  }
+
+  private productIcon(productId: string): string {
+    switch (productId) {
+      case 'ceramic-mug':
+        return ICONS.mug;
+      case 'tshirt-sporty':
+      case 'hoodie-pullover':
+        return ICONS.shirt;
+      case 'iphone-case':
+        return ICONS.phone;
+      case 'fitness-bottle':
+        return ICONS.bottle;
+      case 'backpack-daypack':
+        return ICONS.backpack;
+      case 'baseball-cap':
+        return ICONS.cap;
+      default:
+        return ICONS.shirt;
+    }
   }
 
   private bindEvents() {

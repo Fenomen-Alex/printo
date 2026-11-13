@@ -18,7 +18,12 @@
       "materials": {
         "printableMesh": "Coffee-Mug",
         "printableMaterialName": "Logo",
-        "ceramicMaterials": ["Base", "Bevel", "Inner", "Handle"],
+        "ceramicMaterials": [
+          "Base",
+          "Bevel",
+          "Inner",
+          "Handle"
+        ],
         "liquidMaterial": "Coffee",
         "defaultColor": "#FFFFFF",
         "materialType": "MeshPhysicalMaterial",
@@ -35,7 +40,7 @@
         "uvBounds": {
           "uMin": 0.0911,
           "uMax": 0.9147,
-          "vMin": 0.1390,
+          "vMin": 0.139,
           "vMax": 0.7715
         },
         "textureResolution": {
@@ -44,8 +49,16 @@
         }
       },
       "camera": {
-        "initialPosition": [0, 2.5, 18],
-        "target": [0, 0, 0],
+        "initialPosition": [
+          0,
+          2.5,
+          18
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
         "minDistance": 8,
         "maxDistance": 30,
         "fov": 45
@@ -94,11 +107,328 @@
         }
       },
       "camera": {
-        "initialPosition": [0, 0, 1.3],
-        "target": [0, -0.05, 0],
+        "initialPosition": [
+          0,
+          0,
+          1.3
+        ],
+        "target": [
+          0,
+          -0.05,
+          0
+        ],
         "minDistance": 0.6,
         "maxDistance": 2.5,
         "fov": 42
+      }
+    },
+    {
+      "id": "hoodie-pullover",
+      "name": "Pullover Hoodie",
+      "category": "apparel",
+      "model": "/assets/products/hoodie/model.glb",
+      "source": "Printo procedural product generator",
+      "license": "CC0",
+      "attribution": "Procedurally modeled pullover hoodie",
+      "mappingStrategy": "uv",
+      "complexity": {
+        "vertices": 22557,
+        "triangles": 67380,
+        "primitives": 11,
+        "fileSizeBytes": 1179296
+      },
+      "materials": {
+        "printableMesh": "Hoodie_Front",
+        "printableMaterialName": "Print_Front",
+        "otherMaterials": [
+          "Fabric",
+          "Print_Back",
+          "Rib",
+          "Drawstring",
+          "Metal"
+        ],
+        "defaultColor": "#E5E7EB",
+        "materialType": "MeshStandardMaterial",
+        "roughness": 0.9,
+        "metalness": 0
+      },
+      "printableRegion": {
+        "id": "hoodie-front",
+        "name": "Front Chest",
+        "widthMm": 280,
+        "heightMm": 280,
+        "aspectRatio": 1,
+        "uvBounds": {
+          "uMin": 0,
+          "uMax": 1,
+          "vMin": 0,
+          "vMax": 1
+        },
+        "textureResolution": {
+          "width": 1536,
+          "height": 1536
+        }
+      },
+      "camera": {
+        "initialPosition": [
+          0,
+          0,
+          1.35
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "minDistance": 0.55,
+        "maxDistance": 3,
+        "fov": 40
+      }
+    },
+    {
+      "id": "iphone-case",
+      "name": "iPhone Case",
+      "category": "electronics",
+      "model": "/assets/products/phone-case/model.glb",
+      "source": "Printo procedural product generator",
+      "license": "CC0",
+      "attribution": "Procedurally modeled phone case",
+      "mappingStrategy": "uv",
+      "complexity": {
+        "vertices": 8594,
+        "triangles": 29728,
+        "primitives": 4,
+        "fileSizeBytes": 416356
+      },
+      "materials": {
+        "printableMesh": "Case_Back",
+        "printableMaterialName": "Print",
+        "otherMaterials": [
+          "Rim"
+        ],
+        "defaultColor": "#FFFFFF",
+        "materialType": "MeshStandardMaterial",
+        "roughness": 0.4,
+        "metalness": 0,
+        "clearcoat": 0.3
+      },
+      "printableRegion": {
+        "id": "case-back",
+        "name": "Back Panel",
+        "widthMm": 71.5,
+        "heightMm": 147.5,
+        "aspectRatio": 0.4847,
+        "uvBounds": {
+          "uMin": 0,
+          "uMax": 1,
+          "vMin": 0,
+          "vMax": 1
+        },
+        "textureResolution": {
+          "width": 1024,
+          "height": 2112
+        }
+      },
+      "camera": {
+        "initialPosition": [
+          0,
+          0,
+          0.33
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "minDistance": 0.16,
+        "maxDistance": 0.9,
+        "fov": 38
+      }
+    },
+    {
+      "id": "fitness-bottle",
+      "name": "Fitness Bottle",
+      "category": "drinkware",
+      "model": "/assets/products/bottle/model.glb",
+      "source": "Printo procedural product generator",
+      "license": "CC0",
+      "attribution": "Procedurally modeled fitness bottle",
+      "mappingStrategy": "uv",
+      "complexity": {
+        "vertices": 10350,
+        "triangles": 44303,
+        "primitives": 6,
+        "fileSizeBytes": 434788
+      },
+      "materials": {
+        "printableMesh": "Bottle_Body",
+        "printableMaterialName": "Print",
+        "otherMaterials": [
+          "Trim",
+          "Lid",
+          "Accent"
+        ],
+        "defaultColor": "#FFFFFF",
+        "materialType": "MeshStandardMaterial",
+        "roughness": 0.32,
+        "metalness": 0,
+        "clearcoat": 0.25
+      },
+      "printableRegion": {
+        "id": "bottle-wrap",
+        "name": "Wrap Label",
+        "widthMm": 229,
+        "heightMm": 143,
+        "aspectRatio": 1.6014,
+        "uvBounds": {
+          "uMin": 0,
+          "uMax": 1,
+          "vMin": 0,
+          "vMax": 1
+        },
+        "textureResolution": {
+          "width": 2048,
+          "height": 1280
+        }
+      },
+      "camera": {
+        "initialPosition": [
+          0,
+          0.01,
+          0.55
+        ],
+        "target": [
+          0,
+          -0.01,
+          0
+        ],
+        "minDistance": 0.22,
+        "maxDistance": 1.4,
+        "fov": 40
+      }
+    },
+    {
+      "id": "backpack-daypack",
+      "name": "Daypack Backpack",
+      "category": "accessories",
+      "model": "/assets/products/backpack/model.glb",
+      "source": "Printo procedural product generator",
+      "license": "CC0",
+      "attribution": "Procedurally modeled daypack backpack",
+      "mappingStrategy": "uv",
+      "complexity": {
+        "vertices": 12981,
+        "triangles": 47210,
+        "primitives": 7,
+        "fileSizeBytes": 621552
+      },
+      "materials": {
+        "printableMesh": "Backpack_Front",
+        "printableMaterialName": "Print",
+        "otherMaterials": [
+          "Fabric",
+          "Base",
+          "Strap",
+          "Zipper"
+        ],
+        "defaultColor": "#E5E7EB",
+        "materialType": "MeshStandardMaterial",
+        "roughness": 0.85,
+        "metalness": 0
+      },
+      "printableRegion": {
+        "id": "backpack-front",
+        "name": "Front Panel",
+        "widthMm": 230,
+        "heightMm": 180,
+        "aspectRatio": 1.2778,
+        "uvBounds": {
+          "uMin": 0,
+          "uMax": 1,
+          "vMin": 0,
+          "vMax": 1
+        },
+        "textureResolution": {
+          "width": 1536,
+          "height": 1200
+        }
+      },
+      "camera": {
+        "initialPosition": [
+          0,
+          0,
+          0.95
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "minDistance": 0.4,
+        "maxDistance": 2.2,
+        "fov": 40
+      }
+    },
+    {
+      "id": "baseball-cap",
+      "name": "Baseball Cap",
+      "category": "apparel",
+      "model": "/assets/products/cap/model.glb",
+      "source": "Printo procedural product generator",
+      "license": "CC0",
+      "attribution": "Procedurally modeled baseball cap",
+      "mappingStrategy": "uv",
+      "complexity": {
+        "vertices": 11366,
+        "triangles": 43162,
+        "primitives": 6,
+        "fileSizeBytes": 504604
+      },
+      "materials": {
+        "printableMesh": "Cap_Front",
+        "printableMaterialName": "Print",
+        "otherMaterials": [
+          "Fabric",
+          "Visor",
+          "Strap",
+          "Band"
+        ],
+        "defaultColor": "#E5E7EB",
+        "materialType": "MeshStandardMaterial",
+        "roughness": 0.9,
+        "metalness": 0
+      },
+      "printableRegion": {
+        "id": "cap-front",
+        "name": "Front Panel",
+        "widthMm": 110,
+        "heightMm": 59,
+        "aspectRatio": 1.8644,
+        "uvBounds": {
+          "uMin": 0,
+          "uMax": 1,
+          "vMin": 0,
+          "vMax": 1
+        },
+        "textureResolution": {
+          "width": 1536,
+          "height": 820
+        }
+      },
+      "camera": {
+        "initialPosition": [
+          0.15,
+          0.1,
+          0.45
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "minDistance": 0.2,
+        "maxDistance": 1.2,
+        "fov": 38
       }
     }
   ]
